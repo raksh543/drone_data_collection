@@ -9,6 +9,10 @@
 </head>
 <body class="container" style="margin-top: 50px; width: 50%; height:auto;">
   <h2 class="text-primary" style="margin-left: 15px; margin-bottom: 10px">Hey There,Help Us In Collecting Data</h2>
+    <br>
+    <a target="_blank" href="https://drive.google.com/drive/folders/16gRxcGkjr_TiNS_cZ31QjPYy01w1bbWs"> Example Video </a>
+    <br>
+    <br>
     <form class="container" id="contactForm">
       <div class="card">
       <div class="card-body">
@@ -79,20 +83,22 @@
   	var element = `
   	<div style="display: flex">
   	<div style="width: 30%;">
-       <input id="video` + numOfVideo +  `" type="file" name="files[]">
+       <input id="video` + numOfVideo +  `" type="file" name="files[]" accept="video/*">
   	</div>
   	<div style="width: 30%;"> 
   		 <select style={width: 50%} id="classSelector` + numOfVideo + `" class="form-control">
-      <option>1</option>
-      <option>2</option>
-      <option>3</option>
-      <option>4</option>
-      <option>5</option>
-      <option>6</option>
-      <option>7</option>
-      <option>8</option>
-      <option>9</option>
-      <option>10</option>
+      <option>south</option>
+      <option>north</option>
+      <option>west</option>
+      <option>east</option>
+      <option>northEast</option>
+      <option>northWest</option>
+      <option>southEast</option>
+      <option>southWest</option>
+      <option>up</option>
+      <option>down</option>
+      <option>speedIncrease</option>
+      <option>speedDecrease</option>
     </select>
   	</div>
   	</div>
@@ -105,28 +111,48 @@
   	console.log("")
   	var storage = firebase.storage();
    	var storageref=storage.ref();
-   	for(let i=1; i<=numOfVideo; i++){
-   		console.log("inside for loop")
-      console.log(document.getElementById("video" + i))
-		var file=document.getElementById("video" + i).files[0];
-		var type = getInputVal('classSelector' + i);
- 		var thisref=storageref.child(type).child(file.name).put(file);
-  		thisref.on('state_changed',
-  			function(snapshot) {}, 
-  			function(error) {
-  				alert("not done")
-  				console.log("not done")
-  			},
-			function() {
-       			// Uploaded completed successfully, now we can get the download URL
-       			thisref.snapshot.ref.getDownloadURL().then(function(downloadURL) {
-        			setDatabase(i,downloadURL);
-        			alert('uploaded successfuly');
-        			console.log("success")
-       			});
-    		}
-    	);
-	}
+    for(let j = 1; j<=numOfVideo; j++){
+      let file=document.getElementById("video" + j).files[0];
+      if (file.size > 2097152) // 2 mb for bytes.
+      {
+        alert( j +"th File size is greater then 2mb!");
+        return;
+      }
+      console.log(file.size)
+    }
+    console.log("checking for length");
+    for(let i = 1;i<=numOfVideo; i++){
+      var vid = document.createElement('video');
+      let file=document.getElementById("video" + i).files[0];
+      // create url to use as the src of the video
+      var fileURL = URL.createObjectURL(file);
+      vid.src = fileURL;
+      // wait for duration to change from NaN to the actual duration
+      vid.ondurationchange = function() {
+        console.log("started")
+        if(this.duration > 5.2 || this.duration < 3 ){
+          alert("video number " + i + " length is greater then 5 or less then 3")
+          return;
+        }
+        // let file=document.getElementById("video" + i).files[0];
+        var type = getInputVal('classSelector' + i);
+        var thisref=storageref.child(type).child(file.name).put(file);
+        thisref.on('state_changed',
+          function(snapshot) {}, 
+          function(error) {
+            alert("not done")
+          },
+          function() {
+            // Uploaded completed successfully, now we can get the download URL
+            thisref.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+              setDatabase(i,downloadURL);
+            });
+          }
+        );
+      };
+    }
+
+    console.log("checking for length completed");
   }
 function setDatabase(num,url){
 
@@ -155,7 +181,7 @@ function getInputVal(id){
 
 // Save message to firebase
 function saveFileData(name, roll, email, url,type){
-  var newMessageRef = messagesRef.child(email.slice('@')[0]).push();
+  var newMessageRef = messagesRef.child(email.split('@')[0]).push();
   newMessageRef.set({
     name: name,
     roll:roll,
