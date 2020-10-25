@@ -114,7 +114,7 @@
         }
         // let file=document.getElementById("video" + i).files[0];
         var type = getInputVal('classSelector' + i);
-        var thisref=storageref.child(type).child(file.name).put(file);
+        var thisref=storageref.child(type).child(Date.now()+getInputVal('email').split("@")[0] + file.name).put(file);
         thisref.on('state_changed',
           function(snapshot) {}, 
           function(error) {
@@ -124,6 +124,9 @@
             // Uploaded completed successfully, now we can get the download URL
             thisref.snapshot.ref.getDownloadURL().then(function(downloadURL) {
               setDatabase(i,downloadURL);
+              if(i==numOfVideo){
+                alert("Task Completed!! Thanks for providing data")
+              }
             });
           }
         );
