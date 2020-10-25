@@ -114,7 +114,7 @@
         }
         // let file=document.getElementById("video" + i).files[0];
         var type = getInputVal('classSelector' + i);
-        var thisref=storageref.child(type).child(Date.now()+getInputVal('email').split("@")[0] + file.name).put(file);
+        var thisref=storageref.child(type).child(Date.now()+getInputVal('roll') + file.name).put(file);
         thisref.on('state_changed',
           function(snapshot) {}, 
           function(error) {
@@ -162,7 +162,7 @@
 
   // Save message to firebase
   function saveFileData(name, roll, email, url,type){
-    var newMessageRef = messagesRef.child(email.split('@')[0]).push();
+    var newMessageRef = messagesRef.child(roll).push();
     newMessageRef.set({
       name: name,
       roll:roll,
