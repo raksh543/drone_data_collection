@@ -107,12 +107,9 @@
       var fileURL = URL.createObjectURL(file);
       vid.src = fileURL;
       // wait for duration to change from NaN to the actual duration
-      vid.ondurationchange = function() {
+     
         console.log("started")
-        if(this.duration > 5.2 || this.duration < 3 ){
-          alert("video number " + i + " length is greater then 5 or less then 3")
-          return;
-        }
+        
         // let file=document.getElementById("video" + i).files[0];
         var type = getInputVal('classSelector' + i);
         var thisref=storageref.child(type).child(Date.now()+getInputVal('roll') + file.name).put(file);
@@ -131,7 +128,7 @@
             });
           }
         );
-      };
+     
     }
 
     console.log("checking for length completed");
