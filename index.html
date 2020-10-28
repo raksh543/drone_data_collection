@@ -36,7 +36,9 @@
   </div>
 </div>
 <button type="button" onclick="uploadVideo()" class="btn btn-primary" style="margin-left: 15px; margin-top: 10px">Submit</button>
-<p>You will see an alert message after successful collection of data</p>
+<p>Each video should be between 1 to 2 mb.</p>
+<p>Length of each video should be between 3 to 5 sec.</p>
+<p>You will see an alert message after successful collection of data.</p>
 
 </form>
 </body>
@@ -92,7 +94,7 @@
    	var storageref=storage.ref();
     for(let j = 1; j<=numOfVideo; j++){
       let file=document.getElementById("video" + j).files[0];
-      if (file.size > 2097152) // 2 mb for bytes.
+      if (file.size > 2097152 * 2) // 4 mb for bytes.
       {
         alert( j +"th File size is greater then 2mb!");
         return;
