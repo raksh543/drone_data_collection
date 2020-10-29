@@ -35,7 +35,8 @@
     <button type="button" onclick="addField()">Add More Video</button><br><br>
   </div>
 </div>
-<button type="button" onclick="uploadVideo()" class="btn btn-primary" style="margin-left: 15px; margin-top: 10px">Submit</button>
+<p>Use the below submit button if your internet speed is fast else use the upload button given at side of each dropdown. (click on "Add More Video")</p>
+<button type="button" onclick="uploadVideo()" id="submitBtn" class="btn btn-primary" style="margin-left: 15px; margin-top: 10px">Submit</button>
 <p>Each video should be between 1 to 2 mb.</p>
 <p>Length of each video should be between 3 to 5 sec.</p>
 <p>You will see an alert message after successful collection of data.</p>
@@ -82,14 +83,38 @@
       <option>speedDecrease</option>
     </select>
   	</div>
+    <div style="width: 30%;> <button type="button" onclick="uploadNumVideo(` + numOfVideo + `)" id="submitNumBtn` + numOfVideo + `" class="btn btn-primary" style="margin-left: 15px; margin-top: 10px">Upload ` + numOfVideo + `th file</button> </div>
   	</div>
+    <p id="status` + numOfVideo + `" ></p>
    `
     $("#fieldDiv").append(element);
   }
+
+  function uploadNumVideo(num){
+    console.log("nj")
+    document.getElementById("submitNumBtn" + num).disabled = true;
+    let storage = firebase.storage();
+    let storageref=storage.ref();
+    let file=document.getElementById("video" + num).files[0];
+    if (file.size > 2097152 * 2) // 4 mb for bytes.
+      {
+        alert( num +"th File size is greater then 2mb!");
+        document.getElementById("submitNumBtn").disabled = true;
+        return;
+      }
+    let type = getInputVal('classSelector' + num);
+    let ref=storageref.child(type).child(Date.now()+getInputVal('roll') + file.name);
+    ref.put(file).then(function(snapshot){
+      console.log('Uploaded a blob or file!');
+      console.log(snapshot)
+      document.getElementById("status" + num).innerHTML = "completed";
+      document.getElementById("submitNumBtn").disabled = false;
+    })
+    setDatabase(num);
+  }
  
   function uploadVideo(){
-  	console.log("working")
-  	console.log("")
+    document.getElementById("submitBtn").disabled = true;
   	var storage = firebase.storage();
    	var storageref=storage.ref();
     for(let j = 1; j<=numOfVideo; j++){
@@ -97,78 +122,60 @@
       if (file.size > 2097152 * 2) // 4 mb for bytes.
       {
         alert( j +"th File size is greater then 2mb!");
+        document.getElementById("submitBtn").disabled = true;
         return;
       }
-      console.log(file.size)
     }
-    console.log("checking for length");
     for(let i = 1;i<=numOfVideo; i++){
-      var vid = document.createElement('video');
-      let file=document.getElementById("video" + i).files[0];
-      // create url to use as the src of the video
-      var fileURL = URL.createObjectURL(file);
-      vid.src = fileURL;
-      // wait for duration to change from NaN to the actual duration
-     
-        console.log("started")
-        
-        // let file=document.getElementById("video" + i).files[0];
+        let file=document.getElementById("video" + i).files[0];
         var type = getInputVal('classSelector' + i);
-        var thisref=storageref.child(type).child(Date.now()+getInputVal('roll') + file.name).put(file);
-        thisref.on('state_changed',
-          function(snapshot) {}, 
-          function(error) {
-            alert("not done")
-          },
-          function() {
-            // Uploaded completed successfully, now we can get the download URL
-            thisref.snapshot.ref.getDownloadURL().then(function(downloadURL) {
-              setDatabase(i,downloadURL);
-              if(i==numOfVideo){
-                alert("Task Completed!! Thanks for providing data")
-              }
-            });
-          }
-        );
-     
+        var ref=storageref.child(type).child(Date.now()+getInputVal('roll') + file.name);
+        ref.put(file).then(function(snapshot) {
+          console.log('Uploaded a blob or file!');
+          console.log(snapshot)
+          document.getElementById("status" + i).innerHTML = "completed";
+            if(i==numOfVideo){
+              document.getElementById("submitBtn").disabled = false;
+              numOfVideo = 0;
+              alert("Task Completed!! Thanks for providing data")
+            }
+        });
     }
-
+    for(let k = 1; k<=numOfVideo; k++){
+        console.log("hu")
+        setDatabase(k);
+        console.log("hi")
+    }
     console.log("checking for length completed");
   }
-  function setDatabase(num,url){
-
+  function setDatabase(num){
   // Get values
-  var name = getInputVal('name');
-  var roll = getInputVal('roll');
-  var email = getInputVal('email');
-  var type = getInputVal('classSelector' + num);
-  console.log("setting database")
-
-  // Save message
-  saveFileData(name, roll, email, url,type);
-
-  // Show alert
-  // Hide alert after 3 seconds
-
-
-  // Clear form
-  // document.getElementById('contactForm').reset();
+    var name = getInputVal('name');
+    var roll = getInputVal('roll');
+    var email = getInputVal('email');
+    var type = getInputVal('classSelector' + num);
+    console.log("u->i")
+    console.log("setting database")
+    saveFileData(name, email,type,roll);
   }
-
-  // Function to get get form values
   function getInputVal(id){
     return document.getElementById(id).value;
   }
 
   // Save message to firebase
-  function saveFileData(name, roll, email, url,type){
+  function saveFileData(name, email ,type, roll){
     var newMessageRef = messagesRef.child(roll).push();
+    console.log("op")
     newMessageRef.set({
       name: name,
-      roll:roll,
       email:email,
-      videourl:url,
       class:type
+    }, function(error){
+      if(error){
+        console.log(error)
+      }else{
+        console.log("data fitted")
+      }
     });
   }
 </script>
