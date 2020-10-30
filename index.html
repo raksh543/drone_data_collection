@@ -91,8 +91,11 @@
   }
 
   function uploadNumVideo(num){
-    console.log("nj")
-    document.getElementById("submitNumBtn" + num).disabled = true;
+    if(getInputVal('roll') <= 0){
+      document.getElementById("status" + num).innerHTML = "all field need to be filled";
+      return 
+    }
+    document.getElementById("status" + num).innerHTML = num + " started";
     let storage = firebase.storage();
     let storageref=storage.ref();
     let file=document.getElementById("video" + num).files[0];
@@ -105,10 +108,7 @@
     let type = getInputVal('classSelector' + num);
     let ref=storageref.child(type).child(Date.now()+getInputVal('roll') + file.name);
     ref.put(file).then(function(snapshot){
-      console.log('Uploaded a blob or file!');
-      console.log(snapshot)
-      document.getElementById("status" + num).innerHTML = "completed";
-      document.getElementById("submitNumBtn").disabled = false;
+      document.getElementById("status" + num).innerHTML = num + " completed";
     })
     setDatabase(num);
   }
